@@ -1,0 +1,1496 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SafeFund - Smart Emergency Fund Planner</title>
+    <!-- Tailwind CSS for premium design styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js for dashboard graph visualization -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Lucide Icons for modern, clean iconography -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Netlify Identity Widget SDK -->
+    <script type="text/javascript" src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+    <!-- EmailJS Browser SDK Integration & Initialization -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    <script type="text/javascript">
+       (function(){
+          // Initialize EmailJS with your Public Key securely
+          emailjs.init({
+            publicKey: "Ic3IVM06xbCqfmotg",
+          });
+       })();
+    </script>
+    <!-- Tailwind Custom Configuration -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            500: '#10b981',
+                            600: '#059669',
+                            700: '#047857',
+                            900: '#064e3b',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght=300;400;500;600;700;800&display=swap');
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(229, 231, 235, 0.5);
+        }
+        /* Custom premium scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f0fdf4;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #10b981;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col overflow-x-hidden">
+
+    <!-- AUTHENTICATION OVERLAY (SHIELD SCREEN) -->
+    <div id="auth-overlay" class="min-h-screen bg-gradient-to-br from-brand-900 via-slate-950 to-slate-900 text-white flex flex-col items-center justify-center p-6 text-center relative overflow-hidden">
+        <div class="absolute inset-0 opacity-5 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:24px_24px]"></div>
+        
+        <!-- Center Card Container -->
+        <div class="relative z-10 max-w-md w-full space-y-8 p-8 rounded-3xl bg-white/5 border border-white/10 backdrop-blur-xl shadow-2xl">
+            <div class="flex flex-col items-center space-y-4">
+                <!-- Premium SafeFund Logo -->
+                <div class="p-4 bg-brand-500 text-white rounded-2xl shadow-xl shadow-brand-500/20 animate-bounce">
+                    <i data-lucide="shield-check" class="w-10 h-10"></i>
+                </div>
+                <h1 class="text-3xl font-extrabold tracking-tight">
+                    Safe<span class="text-brand-500">Fund</span>
+                </h1>
+                <p class="text-sm font-semibold text-brand-100 uppercase tracking-widest">
+                    Emergency Fund Planner
+                </p>
+            </div>
+
+            <div class="space-y-2">
+                <h2 class="text-xl font-bold text-white">Welcome to SafeFund</h2>
+                <p class="text-xs text-slate-300 leading-relaxed">
+                    Please log in or sign up to manage and simulate your emergency fund and financial protection targets securely.
+                </p>
+            </div>
+
+            <!-- Get Started Button -->
+            <button onclick="netlifyIdentity.open('login')" class="w-full bg-brand-500 hover:bg-brand-600 text-white font-bold py-3.5 px-6 rounded-xl transition-all shadow-lg shadow-brand-500/20 text-sm flex items-center justify-center gap-2">
+                <i data-lucide="log-in" class="w-4 h-4"></i> Get Started / Log In
+            </button>
+
+            <div class="text-[10px] text-slate-400 border-t border-white/10 pt-4">
+                Secured by Netlify Identity Authentication
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN DASHBOARD CONTENT (HIDDEN BY DEFAULT UNTIL AUTHENTICATED) -->
+    <div id="main-dashboard" class="hidden min-h-screen flex flex-col">
+        <!-- Header / Top Navigation -->
+        <header class="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-slate-100 shadow-sm">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="p-2 bg-brand-500 text-white rounded-xl shadow-md shadow-brand-500/20">
+                        <i data-lucide="shield-check" class="w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <span class="font-extrabold text-xl tracking-tight text-slate-900">Safe<span class="text-brand-600">Fund</span></span>
+                        <span class="hidden sm:inline-block text-xs text-slate-500 ml-2 border-l border-slate-200 pl-2">Emergency Fund Planner</span>
+                    </div>
+                </div>
+                
+                <nav class="flex items-center gap-2">
+                    <button onclick="scrollToId('setup-section')" class="px-3 py-2 text-xs sm:text-sm font-medium text-slate-600 hover:text-brand-600 transition-colors hidden md:inline-flex items-center">
+                        <i data-lucide="calculator" class="w-4 h-4 mr-1"></i> Calculator
+                    </button>
+                    <button onclick="scrollToId('method-section')" class="px-3 py-2 text-xs sm:text-sm font-medium text-slate-600 hover:text-brand-600 transition-colors hidden md:inline-flex items-center">
+                        <i data-lucide="wallet" class="w-4 h-4 mr-1"></i> Saving Methods
+                    </button>
+                    <button onclick="scrollToId('dashboard-section')" class="px-3 py-2 text-xs sm:text-sm font-medium text-slate-600 hover:text-brand-600 transition-colors hidden sm:inline-flex items-center">
+                        <i data-lucide="layout-dashboard" class="w-4 h-4 mr-1"></i> Dashboard
+                    </button>
+                    
+                    <!-- Cloud Sync & Netlify Identity Controls -->
+                    <div class="flex items-center gap-2 border-l border-slate-200 pl-3">
+                        <button id="cloud-save-btn" onclick="savePlanToCloud()" class="bg-brand-600 hover:bg-brand-700 text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition-all shadow-sm hidden flex items-center gap-1">
+                            <i data-lucide="cloud-upload" class="w-3.5 h-3.5"></i> Save Plan
+                        </button>
+                        <button id="auth-action-btn" onclick="openNetlifyModal()" class="bg-slate-950 hover:bg-slate-900 text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition-all shadow-sm flex items-center gap-1">
+                            <i data-lucide="log-in" class="w-3.5 h-3.5"></i> Log In / Sign Up
+                        </button>
+                        <!-- Log Out Button with explicit ID -->
+                        <button id="logout-button" class="bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition-all shadow-sm hidden flex items-center gap-1">
+                            <i data-lucide="log-out" class="w-3.5 h-3.5"></i> Log Out
+                        </button>
+                    </div>
+                </nav>
+            </div>
+        </header>
+
+        <!-- Main Content Grid -->
+        <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12">
+            
+            <!-- Welcome Banner / Active Cloud Session -->
+            <div id="user-welcome-banner" class="hidden bg-emerald-50 border border-emerald-100 rounded-2xl p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div class="flex items-center gap-3">
+                    <div class="p-2 bg-brand-500 text-white rounded-xl shadow">
+                        <i data-lucide="cloud-lightning" class="w-5 h-5"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-slate-900">SafeFund Active Cloud Protection Enabled</h4>
+                        <p class="text-xs text-slate-500">Logged in as <span id="user-email-display" class="font-semibold text-brand-700">user@example.com</span>. Your progress ledger and budget inputs are automatically synced.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Hero Section -->
+            <section class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-brand-900 to-slate-900 text-white p-8 sm:p-12 shadow-2xl">
+                <div class="absolute inset-0 opacity-10 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px]"></div>
+                <div class="relative z-10 max-w-2xl space-y-4">
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-brand-500/20 text-brand-100 border border-brand-500/30">
+                        <span class="w-2 h-2 bg-brand-400 rounded-full animate-pulse"></span> Dynamic Carryover & Calendar Timelines
+                    </span>
+                    <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight">
+                        Secure Your Financial Peace of Mind Against Unexpected Emergencies.
+                    </h1>
+                    <p class="text-slate-300 text-sm sm:text-base leading-relaxed">
+                        An emergency fund is the bedrock of robust personal finance. Track monthly expenses, set targets, choose local saving vehicles, and manage carryover shortages dynamically to keep your goals realistic.
+                    </p>
+                    <div class="pt-2 flex flex-wrap gap-3">
+                        <button onclick="scrollToId('setup-section')" class="bg-brand-500 hover:bg-brand-600 text-white font-bold px-6 py-3 rounded-xl transition-all shadow-lg shadow-brand-500/20 flex items-center gap-2 text-sm">
+                            Start Planning Now <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                        </button>
+                        <button onclick="loadSampleData()" class="bg-white/10 hover:bg-white/20 border border-white/15 text-white font-semibold px-5 py-3 rounded-xl transition-all text-sm flex items-center gap-2">
+                            <i data-lucide="sparkles" class="w-4 h-4 text-brand-300"></i> Load Demo Data
+                        </button>
+                    </div>
+                </div>
+                <div class="absolute right-0 bottom-0 top-0 w-1/3 hidden lg:flex items-center justify-center opacity-25">
+                    <i data-lucide="trending-up" class="w-48 h-48 text-brand-400"></i>
+                </div>
+            </section>
+
+            <!-- SECTION 1: PERSONAL INFORMATION, INCOME & EXPENSES -->
+            <section id="setup-section" class="scroll-mt-20">
+                <div class="flex items-center gap-2 mb-6">
+                    <div class="p-2 bg-brand-100 text-brand-700 rounded-lg">
+                        <i data-lucide="user-plus" class="w-5 h-5"></i>
+                    </div>
+                    <h2 class="text-xl sm:text-2xl font-bold text-slate-900">Step 1: Budget Profile & Custom Target</h2>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <!-- Profile Settings -->
+                    <div class="glass-card p-6 rounded-2xl shadow-sm space-y-6 lg:col-span-1">
+                        <h3 class="text-lg font-bold text-slate-900 border-b pb-3 flex items-center gap-2">
+                            <i data-lucide="user" class="w-4 h-4 text-slate-500"></i> Your Profile
+                        </h3>
+                        
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Full Name</label>
+                                <input type="text" id="full-name" value="" placeholder="Enter your name" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent text-sm bg-slate-50/50">
+                            </div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Age</label>
+                                    <input type="number" id="age" value="" placeholder="e.g. 30" min="18" max="100" oninput="calculateLogic()" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent text-sm bg-slate-50/50">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Marital Status</label>
+                                    <select id="marital-status" onchange="calculateLogic()" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent text-sm bg-slate-50/50">
+                                        <option value="Single" selected>Single</option>
+                                        <option value="Married">Married</option>
+                                        <option value="Married with Kids">Married with Dependents</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Employment Status</label>
+                                <select id="employment-status" onchange="calculateLogic()" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent text-sm bg-slate-50/50">
+                                    <option value="Government">Government Employee (Stable)</option>
+                                    <option value="Private" selected>Private Sector Employee (Moderate)</option>
+                                    <option value="Freelancer">Freelancer / Self-employed (High Risk)</option>
+                                    <option value="Business Owner">Business Owner / Entrepreneur</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Income Stability</label>
+                                <select id="income-stability" onchange="calculateLogic()" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent text-sm bg-slate-50/50">
+                                    <option value="High">Very Stable (Fixed monthly income)</option>
+                                    <option value="Moderate" selected>Moderate (Minor variations)</option>
+                                    <option value="Low">Unstable (Highly dependent on projects/gigs)</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Net Monthly Income (RM)</label>
+                                <div class="relative rounded-xl shadow-sm">
+                                    <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                                        <span class="text-slate-400 text-sm font-medium">RM</span>
+                                    </div>
+                                    <input type="number" id="monthly-income" value="" placeholder="0" min="0" oninput="calculateLogic()" class="w-full pl-12 pr-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent text-sm bg-slate-50/50 font-semibold text-slate-800">
+                                </div>
+                            </div>
+
+                            <div class="p-3 bg-brand-50 border border-brand-100 rounded-xl space-y-1.5">
+                                <label class="block text-xs font-bold uppercase tracking-wider text-brand-800">Planned Monthly Deposit (RM)</label>
+                                <p class="text-[11px] text-brand-600 leading-tight">Your ideal monthly savings target. Actual savings can be logged inside the ledger below.</p>
+                                <div class="relative rounded-lg shadow-sm mt-1">
+                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <span class="text-brand-500 text-xs font-bold">RM</span>
+                                    </div>
+                                    <input type="number" id="custom-monthly-deposit" value="" placeholder="e.g. 800" min="0" oninput="calculateLogic()" class="w-full pl-10 pr-3 py-2 rounded-lg border border-brand-200 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent text-sm bg-white font-bold text-slate-900">
+                                </div>
+                            </div>
+
+                            <!-- Start Date month picker -->
+                            <div class="p-3 bg-slate-100 border border-slate-200 rounded-xl space-y-1.5">
+                                <label class="block text-xs font-bold uppercase tracking-wider text-slate-700">Start Savings Period</label>
+                                <p class="text-[11px] text-slate-500 leading-tight">Choose when you intend to begin depositing into your emergency fund.</p>
+                                <input type="month" id="start-date" value="2026-06" onchange="calculateLogic()" class="w-full px-3 py-2 rounded-lg border border-slate-300 text-xs font-bold bg-white focus:outline-none focus:ring-2 focus:ring-brand-500">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Monthly Commitments & Cost Fields -->
+                    <div class="glass-card p-6 rounded-2xl shadow-sm space-y-6 lg:col-span-2">
+                        <div class="flex items-center justify-between border-b pb-3">
+                            <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+                                <i data-lucide="receipt" class="w-4 h-4 text-slate-500"></i> Monthly Cost & Commitments (RM)
+                            </h3>
+                            <span class="text-xs text-slate-400">Enter your average outgoings</span>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="flex items-center justify-between p-3 bg-slate-50 rounded-xl gap-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="p-2 bg-blue-100 text-blue-700 rounded-lg"><i data-lucide="home" class="w-4 h-4"></i></div>
+                                    <span class="text-sm font-medium text-slate-700">Rent / Housing Mortgage</span>
+                                </div>
+                                <input type="number" id="exp-housing" value="" placeholder="0" min="0" oninput="calculateLogic()" class="w-28 text-right px-3 py-1.5 rounded-lg border border-slate-200 text-sm font-semibold">
+                            </div>
+
+                            <div class="flex items-center justify-between p-3 bg-slate-50 rounded-xl gap-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="p-2 bg-yellow-100 text-yellow-700 rounded-lg"><i data-lucide="zap" class="w-4 h-4"></i></div>
+                                    <span class="text-sm font-medium text-slate-700">Utilities (Electric, Water, Bills)</span>
+                                </div>
+                                <input type="number" id="exp-utilities" value="" placeholder="0" min="0" oninput="calculateLogic()" class="w-28 text-right px-3 py-1.5 rounded-lg border border-slate-200 text-sm font-semibold">
+                            </div>
+
+                            <div class="flex items-center justify-between p-3 bg-slate-50 rounded-xl gap-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="p-2 bg-indigo-100 text-indigo-700 rounded-lg"><i data-lucide="car" class="w-4 h-4"></i></div>
+                                    <span class="text-sm font-medium text-slate-700">Transportation / Petrol / Tolls</span>
+                                </div>
+                                <input type="number" id="exp-transportation" value="" placeholder="0" min="0" oninput="calculateLogic()" class="w-28 text-right px-3 py-1.5 rounded-lg border border-slate-200 text-sm font-semibold">
+                            </div>
+
+                            <div class="flex items-center justify-between p-3 bg-slate-50 rounded-xl gap-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="p-2 bg-orange-100 text-orange-700 rounded-lg"><i data-lucide="utensils" class="w-4 h-4"></i></div>
+                                    <span class="text-sm font-medium text-slate-700">Food & Daily Groceries</span>
+                                </div>
+                                <input type="number" id="exp-food" value="" placeholder="0" min="0" oninput="calculateLogic()" class="w-28 text-right px-3 py-1.5 rounded-lg border border-slate-200 text-sm font-semibold">
+                            </div>
+
+                            <div class="flex items-center justify-between p-3 bg-slate-50 rounded-xl gap-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="p-2 bg-red-100 text-red-700 rounded-lg"><i data-lucide="heart-pulse" class="w-4 h-4"></i></div>
+                                    <span class="text-sm font-medium text-slate-700">Insurance / Takaful premiums</span>
+                                </div>
+                                <input type="number" id="exp-insurance" value="" placeholder="0" min="0" oninput="calculateLogic()" class="w-28 text-right px-3 py-1.5 rounded-lg border border-slate-200 text-sm font-semibold">
+                            </div>
+
+                            <div class="flex items-center justify-between p-3 bg-slate-50 rounded-xl gap-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="p-2 bg-emerald-100 text-emerald-700 rounded-lg"><i data-lucide="landmark" class="w-4 h-4"></i></div>
+                                    <span class="text-sm font-medium text-slate-700">PTPTN / Hire Purchase / Car Loan</span>
+                                </div>
+                                <input type="number" id="exp-loan" value="" placeholder="0" min="0" oninput="calculateLogic()" class="w-28 text-right px-3 py-1.5 rounded-lg border border-slate-200 text-sm font-semibold">
+                            </div>
+
+                            <div class="flex items-center justify-between p-3 bg-slate-50 rounded-xl gap-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="p-2 bg-purple-100 text-purple-700 rounded-lg"><i data-lucide="users" class="w-4 h-4"></i></div>
+                                    <span class="text-sm font-medium text-slate-700">Family Support / Allowance</span>
+                                </div>
+                                <input type="number" id="exp-family" value="" placeholder="0" min="0" oninput="calculateLogic()" class="w-28 text-right px-3 py-1.5 rounded-lg border border-slate-200 text-sm font-semibold">
+                            </div>
+
+                            <div class="flex items-center justify-between p-3 bg-slate-50 rounded-xl gap-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="p-2 bg-cyan-100 text-cyan-700 rounded-lg"><i data-lucide="wifi" class="w-4 h-4"></i></div>
+                                    <span class="text-sm font-medium text-slate-700">Mobile Plan & Internet Bills</span>
+                                </div>
+                                <input type="number" id="exp-internet" value="" placeholder="0" min="0" oninput="calculateLogic()" class="w-28 text-right px-3 py-1.5 rounded-lg border border-slate-200 text-sm font-semibold">
+                            </div>
+
+                            <div class="flex items-center justify-between p-3 bg-slate-50 rounded-xl gap-4 md:col-span-2">
+                                <div class="flex items-center gap-3">
+                                    <div class="p-2 bg-slate-200 text-slate-700 rounded-lg"><i data-lucide="more-horizontal" class="w-4 h-4"></i></div>
+                                    <span class="text-sm font-medium text-slate-700">Other Commitments (Subs, Gym, etc.)</span>
+                                </div>
+                                <input type="number" id="exp-others" value="" placeholder="0" min="0" oninput="calculateLogic()" class="w-28 text-right px-3 py-1.5 rounded-lg border border-slate-200 text-sm font-semibold">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 2 & 3: RISK ASSESSMENT & SAVING METHODS -->
+            <section class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- Multi-Factor Risk Assessment Summary -->
+                <div id="risk-summary-card" class="glass-card p-6 rounded-2xl shadow-sm space-y-6 flex flex-col justify-between">
+                    <div>
+                        <h3 class="text-lg font-bold text-slate-900 border-b pb-3 mb-4 flex items-center gap-2">
+                            <i data-lucide="activity" class="w-4 h-4 text-slate-500"></i> Multi-Factor Risk Profile Summary
+                        </h3>
+                        
+                        <div class="space-y-4">
+                            <div class="p-4 rounded-xl flex items-center justify-between transition-all" id="risk-badge-container">
+                                <div>
+                                    <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Financial Risk Factor</p>
+                                    <p class="text-lg font-extrabold" id="risk-display-label">MODERATE</p>
+                                </div>
+                                <span class="px-3.5 py-1.5 rounded-full text-xs font-bold shadow-sm" id="risk-badge-text">Medium</span>
+                            </div>
+
+                            <div class="grid grid-cols-3 gap-3">
+                                <div class="bg-slate-50 p-3 rounded-xl border border-slate-100 text-center">
+                                    <span class="text-[10px] text-slate-400 block mb-0.5 uppercase tracking-wide font-semibold font-sans">Total Commitments</span>
+                                    <span class="text-sm font-bold text-slate-800" id="summary-total-expenses">RM 0.00</span>
+                                </div>
+                                <div class="bg-blue-50/50 p-3 rounded-xl border border-blue-100 text-center">
+                                    <span class="text-[10px] text-blue-700 block mb-0.5 uppercase tracking-wide font-semibold font-sans">Surplus Capacity</span>
+                                    <span class="text-sm font-bold text-blue-800" id="summary-saving-capacity-left">RM 0.00</span>
+                                </div>
+                                <div class="bg-brand-50 p-3 rounded-xl border border-brand-100 text-center">
+                                    <span class="text-[10px] text-brand-700 block mb-0.5 uppercase tracking-wide font-semibold font-sans">Target Deposit</span>
+                                    <span class="text-sm font-bold text-brand-600" id="summary-saving-capacity">RM 0.00</span>
+                                </div>
+                            </div>
+
+                            <div class="space-y-2">
+                                <div class="flex justify-between text-xs text-slate-500 font-medium">
+                                    <span>Commitment / Net Income Ratio</span>
+                                    <span id="commitment-ratio-label">0.0%</span>
+                                </div>
+                                <div class="w-full bg-slate-200 rounded-full h-2">
+                                    <div id="commitment-ratio-bar" class="bg-brand-500 h-2 rounded-full transition-all duration-500" style="width: 0%"></div>
+                                </div>
+                                <p class="text-[11px] text-slate-400 leading-tight" id="commitment-ratio-desc">Enter income and commitment costs to run analysis.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pt-4 border-t border-slate-100 mt-4 space-y-3 bg-brand-50/50 p-4 rounded-xl">
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs font-semibold text-slate-600">Recommended Coverage:</span>
+                            <span class="text-sm font-bold text-brand-700 bg-brand-100/50 px-2.5 py-0.5 rounded-md" id="rec-months">6 Months</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm font-bold text-slate-800">Target Emergency Fund:</span>
+                            <span class="text-xl font-extrabold text-brand-600" id="rec-total-fund">RM 0.00</span>
+                        </div>
+                        <div class="flex justify-between items-center text-xs text-slate-500">
+                            <span>Expected Months to Complete:</span>
+                            <span class="font-bold text-slate-900 bg-white px-2 py-0.5 rounded border border-slate-200" id="rec-months-to-achieve">0.0 Months</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Savings Methods Selection -->
+                <div id="method-section" class="glass-card p-6 rounded-2xl shadow-sm space-y-6 flex flex-col justify-between scroll-mt-20">
+                    <div class="space-y-4">
+                        <h3 class="text-lg font-bold text-slate-900 border-b pb-3 flex items-center gap-2">
+                            <i data-lucide="wallet" class="w-4 h-4 text-slate-500"></i> Pick Savings Vehicle & Interest Rates
+                        </h3>
+                        <p class="text-xs text-slate-500 leading-relaxed">
+                            Pick a savings platform in Malaysia. Compounded monthly dividends over your custom timeline accelerate your shield path.
+                        </p>
+
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Malaysian Savings Platform</label>
+                                <select id="selected-bank" onchange="handleBankChange()" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent text-sm bg-slate-50 font-semibold text-slate-800">
+                                    <option value="Maybank" data-rate="3.0">Maybank (MAE/Savings) - 3.0% p.a.</option>
+                                    <option value="CIMB" data-rate="2.0">CIMB (OctoSavers/e-savings) - 2.0% p.a.</option>
+                                    <option value="RHB" data-rate="3.0">RHB Bank (Smart Account) - 3.0% p.a.</option>
+                                    <option value="Public" data-rate="1.0">Public Bank (Saving Account) - 1.0% p.a.</option>
+                                    <option value="BankIslam" data-rate="2.5" selected>Bank Islam (Islamic Savings Account) - 2.5% p.a.</option>
+                                    <option value="TnG" data-rate="3.6">Touch 'n Go (GO+) - 3.6% p.a.</option>
+                                    <option value="GxBank" data-rate="2.0">GxBank (Digital Bank) - 2.0% p.a.</option>
+                                    <option value="Alliance" data-rate="2.75">Alliance SavePlus - 2.75% p.a.</option>
+                                    <option value="Affin" data-rate="0.25">Affin Bank Berhad - 0.25% p.a.</option>
+                                    <option value="AmBank" data-rate="1.95">AmBank (eFlex) - 1.95% p.a.</option>
+                                    <option value="HongLeong" data-rate="3.5">Hong Leong Bank Berhad - 3.5% p.a.</option>
+                                    <option value="ASB" data-rate="5.25">Amanah Saham Bumiputera (ASB) - 5.25% p.a.</option>
+                                    <option value="Custom">Custom Rate</option>
+                                </select>
+                            </div>
+
+                            <div id="custom-rate-container" class="hidden">
+                                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Custom Interest Rate (% p.a.)</label>
+                                <input type="number" id="custom-rate" value="3.00" step="0.01" min="0" max="20" oninput="calculateLogic()" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent text-sm bg-slate-50/50">
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-4 pt-1">
+                                <div class="bg-brand-50/50 p-3 rounded-xl border border-brand-100">
+                                    <span class="text-[10px] text-brand-700 font-semibold block uppercase font-sans">Annual Dividend Rate (p.a.)</span>
+                                    <span class="text-xl font-extrabold text-brand-600" id="display-annual-rate">2.50%</span>
+                                </div>
+                                <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                                    <span class="text-[10px] text-slate-500 font-semibold block uppercase font-sans">Monthly Compounded Rate</span>
+                                    <span class="text-sm font-bold text-slate-700" id="display-monthly-rate">0.208%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- EMAIL REMINDERS SETUP SECTION (EmailJS Integration Enabled) -->
+                    <div class="mt-4 border-t border-slate-100 pt-4 space-y-4">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <div class="p-1.5 bg-blue-100 text-blue-700 rounded-lg">
+                                    <i data-lucide="bell" class="w-4 h-4"></i>
+                                </div>
+                                <span class="text-sm font-bold text-slate-900">Configure Smart Email Reminders</span>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" id="email-notif-toggle" class="sr-only peer" onchange="toggleEmailSetup()">
+                                <div class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-brand-500"></div>
+                            </label>
+                        </div>
+
+                        <div id="email-setup-box" class="hidden space-y-3 bg-blue-50/50 border border-blue-100 p-3 rounded-xl">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">Email Address</label>
+                                    <input type="email" id="reminder-email" placeholder="your@email.com" class="w-full px-2 py-1.5 rounded-lg border border-slate-200 text-xs focus:ring-1 focus:ring-blue-500">
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">Reminder Schedule</label>
+                                    <select id="reminder-schedule" class="w-full px-2 py-1.5 rounded-lg border border-slate-200 text-xs focus:ring-1 focus:ring-blue-500">
+                                        <option value="monthly-end">Last Day of Month</option>
+                                        <option value="monthly-middle">15th of Every Month</option>
+                                        <option value="weekly">Every Sunday Morning</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="flex justify-between items-center gap-2 pt-1">
+                                <span class="text-[9px] text-slate-400">Receive alert if you forget to log actual monthly deposit.</span>
+                                <button id="test-alert-btn" onclick="sendRealEmailAlert()" class="bg-blue-600 hover:bg-blue-700 text-white text-[10px] font-bold px-2 py-1 rounded-md transition-colors flex items-center gap-1">
+                                    <i data-lucide="mail-check" class="w-3 h-3"></i> Test Real Alert (EmailJS)
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 4: VISUAL GRAPH CHART & KPI OVERVIEW -->
+            <section id="dashboard-section" class="scroll-mt-20 space-y-8">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <div class="p-2 bg-brand-500 text-white rounded-lg">
+                            <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+                        </div>
+                        <h2 class="text-xl sm:text-2xl font-bold text-slate-900">Savings & Progress Dashboard</h2>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs text-slate-400 hidden sm:inline-block">Calculated dynamically</span>
+                        <button onclick="calculateLogic()" class="p-2 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-lg transition-colors" title="Refresh">
+                            <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- KPI Metric Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                    <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-4">
+                        <div class="p-3 bg-brand-100 text-brand-600 rounded-xl">
+                            <i data-lucide="target" class="w-6 h-6"></i>
+                        </div>
+                        <div>
+                            <span class="text-xs text-slate-400 block font-medium">Target Fund Goal</span>
+                            <span class="text-xl font-bold text-slate-800" id="kpi-target">RM 0.00</span>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-4">
+                        <div class="p-3 bg-emerald-100 text-emerald-600 rounded-xl">
+                            <i data-lucide="piggy-bank" class="w-6 h-6"></i>
+                        </div>
+                        <div>
+                            <span class="text-xs text-slate-400 block font-medium">Final Accumulated Balance</span>
+                            <span class="text-xl font-bold text-slate-800" id="kpi-savings">RM 0.00</span>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-4">
+                        <div class="p-3 bg-amber-100 text-amber-600 rounded-xl">
+                            <i data-lucide="gift" class="w-6 h-6"></i>
+                        </div>
+                        <div>
+                            <span class="text-xs text-slate-400 block font-medium">Total Dividends Earned</span>
+                            <span class="text-xl font-bold text-emerald-600" id="kpi-dividends">RM 0.00</span>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-4">
+                        <div class="p-3 bg-blue-100 text-blue-600 rounded-xl">
+                            <i data-lucide="percent" class="w-6 h-6"></i>
+                        </div>
+                        <div>
+                            <span class="text-xs text-slate-400 block font-medium">Overall Progress</span>
+                            <span class="text-xl font-bold text-blue-600" id="kpi-percentage">0%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <!-- Graf Perkembangan Aliran Simpanan -->
+                    <div class="glass-card p-6 rounded-2xl shadow-sm lg:col-span-2 space-y-4">
+                        <div class="flex items-center justify-between border-b pb-3">
+                            <div>
+                                <h4 class="font-bold text-slate-900" id="chart-title">Dynamic Savings Timeline Projection</h4>
+                                <p class="text-xs text-slate-400">Cumulative Savings + Compound Dividends over recommended months</p>
+                            </div>
+                        </div>
+                        <div class="h-80 w-full relative">
+                            <canvas id="projectionChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Penilaian Realistik & Nasihat Pintar -->
+                    <div class="glass-card p-6 rounded-2xl shadow-sm space-y-6 flex flex-col justify-between">
+                        <div>
+                            <h4 class="font-bold text-slate-900 border-b pb-3 mb-4">Is Your Target Realistic?</h4>
+                            <div class="space-y-4 text-sm">
+                                <div class="p-4 bg-brand-50 rounded-xl border border-brand-100 text-brand-900 space-y-2">
+                                    <p class="font-bold flex items-center gap-1.5 text-brand-800">
+                                        <i data-lucide="check-circle" class="w-5 h-5"></i> Plan Evaluation Verdict
+                                    </p>
+                                    <p class="text-xs leading-relaxed" id="verdict-text">
+                                        Please enter your financial credentials above to evaluate the plan feasibility.
+                                    </p>
+                                </div>
+
+                                <div class="space-y-3 pt-2">
+                                    <div class="flex justify-between">
+                                        <span class="text-xs text-slate-500">Default Monthly Deposit:</span>
+                                        <span class="font-bold text-brand-600" id="status-cap">RM 0.00</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-xs text-slate-500">Financial Baseline (3 Months):</span>
+                                        <span class="font-bold text-slate-700" id="status-min">RM 0.00</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-xs text-slate-500">Target Shield (Recommended):</span>
+                                        <span class="font-bold text-slate-900" id="status-target">RM 0.00</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-slate-50 p-4 rounded-xl space-y-2 border border-slate-100">
+                            <h5 class="text-xs font-bold text-slate-700 uppercase tracking-wider">Quick Emergency Fund Tips</h5>
+                            <ul class="text-xs text-slate-500 list-disc list-inside space-y-1">
+                                <li>Isolate your emergency money away from daily spending accounts.</li>
+                                <li>Select savings vehicles with high liquidity (can be withdrawn quickly).</li>
+                                <li>Use ONLY for true emergencies (medical crisis, job loss, critical repairs).</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PROJECTIONS LEDGER (MY PROGRESS) WITH EMPTY STARTING VALUES & DEBT CARROYOVER SUGGESTIONS -->
+                <div class="glass-card p-6 rounded-2xl shadow-sm overflow-hidden">
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b pb-4 mb-4">
+                        <div>
+                            <h4 class="font-bold text-slate-900" id="ledger-title">Month-to-Month Projections Ledger (My Progress)</h4>
+                            <p class="text-xs text-slate-400">Fill in your actual monthly savings under **Actual Deposit**. The **Suggested Target** adjusts dynamically to carry over previous months' shortages!</p>
+                        </div>
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800">
+                            <i data-lucide="edit-3" class="w-3.5 h-3.5"></i> Custom Monthly Ledger
+                        </span>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="border-b border-slate-100 text-slate-400 text-xs font-semibold uppercase tracking-wider">
+                                    <th class="py-3 px-4">Period</th>
+                                    <th class="py-3 px-4 text-right">Beginning Balance</th>
+                                    <th class="py-3 px-4 text-center">Actual Deposit (RM)</th>
+                                    <th class="py-3 px-4 text-right">Dividends Earned</th>
+                                    <th class="py-3 px-4 text-right">Ending Balance</th>
+                                    <th class="py-3 px-4 text-center">Goal Ratio (%)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="progress-table-body" class="text-sm divide-y divide-slate-100">
+                                <!-- Populated dynamically via JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+
+        <!-- FOOTER -->
+        <footer class="bg-slate-900 text-slate-400 py-12 mt-16 border-t border-slate-800">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-6">
+                <div class="flex items-center gap-3">
+                    <div class="p-2 bg-brand-600 text-white rounded-lg">
+                        <i data-lucide="shield-check" class="w-5 h-5"></i>
+                    </div>
+                    <span class="font-extrabold text-lg text-white">SafeFund</span>
+                </div>
+                <p class="text-xs text-slate-500 text-center md:text-right">
+                    © 2026 SafeFund. Inspired by the Emergency Fund Concept Template.<br>
+                    For educational calculations and financial budgeting guidance.
+                </p>
+            </div>
+        </footer>
+    </div>
+
+    <!-- TOAST ALERT SYSTEM -->
+    <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2"></div>
+
+    <!-- MOCK EMAIL SYSTEM MODAL (Triggered as diagnostic fallback if EmailJS fails or config is incomplete) -->
+    <div id="mock-email-modal" class="fixed inset-0 z-50 overflow-y-auto hidden bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl relative border border-slate-100">
+            <button onclick="closeMockEmailModal()" class="absolute right-4 top-4 text-slate-400 hover:text-slate-600 transition-colors">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+            <div class="text-center space-y-3">
+                <div class="mx-auto w-12 h-12 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center">
+                    <i data-lucide="mail" class="w-6 h-6"></i>
+                </div>
+                <h3 class="text-lg font-bold text-slate-900">Email System Sandbox Notice</h3>
+                <p class="text-xs text-slate-400">If your EmailJS configuration requires verification, SafeFund has simulated the email template below:</p>
+            </div>
+            <div class="mt-4 p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-2 text-left text-xs text-slate-700">
+                <p><strong>To:</strong> <span id="mock-to" class="font-semibold text-blue-700">your@email.com</span></p>
+                <p><strong>Subject:</strong> 🛡️ SafeFund Reminder: Don't forget your savings!</p>
+                <hr class="border-slate-200 my-2">
+                <p class="leading-relaxed">Hi there,</p>
+                <p class="leading-relaxed">This is a friendly reminder from your <strong>SafeFund</strong> planner. We noticed you haven't filled in your actual monthly savings for the current period yet.</p>
+                <p class="leading-relaxed">Discipline is key to building your shield! Update your actual savings inside SafeFund today to keep your dynamic target timeline realistic.</p>
+                <p class="leading-relaxed">Stay secure,<br><strong>Team SafeFund</strong></p>
+            </div>
+            <button onclick="closeMockEmailModal()" class="w-full mt-4 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-xl transition-all shadow-md text-xs">
+                Awesome, got it!
+            </button>
+        </div>
+    </div>
+
+    <!-- MAIN APP JAVASCRIPT LOGIC -->
+    <script>
+        const bankRates = {
+            'Maybank': 0.03,
+            'CIMB': 0.02,
+            'RHB': 0.03,
+            'Public': 0.01,
+            'BankIslam': 0.025,
+            'TnG': 0.036,
+            'GxBank': 0.02,
+            'Alliance': 0.0275,
+            'Affin': 0.0025,
+            'AmBank': 0.0195,
+            'HongLeong': 0.035,
+            'ASB': 0.0525
+        };
+
+        // Global states
+        let customDepositsMap = {};
+        let chartInstance = null;
+        let currentUser = null;
+
+        // Force cleanup function for Netlify Identity lockups
+        // Fungsi pembersihan paksa bagi sisa modal Netlify Identity yang menyekat klikan
+        function forceNetlifyCleanup() {
+            // Memadam kelas sekatan skrol pada elemen body
+            document.body.classList.remove('netlify-identity-open');
+            document.body.style.overflow = 'auto';
+            document.body.style.position = '';
+            
+            // Membuang overlay tindanan modal Netlify yang tersisa di dalam DOM
+            const overlays = document.querySelectorAll('.netlify-identity-overlay');
+            overlays.forEach(overlay => {
+                overlay.style.pointerEvents = 'none';
+                overlay.remove();
+            });
+        }
+
+        // Initialize and listen for user login status on load
+        window.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+            
+            // Set Start Date Picker default value to current month
+            const today = new Date();
+            const year = today.getFullYear();
+            const month = String(today.getMonth() + 1).padStart(2, '0');
+            document.getElementById('start-date').value = `${year}-${month}`;
+
+            // Initialize Netlify Identity Widget SDK
+            if (window.netlifyIdentity) {
+                // FIXED: Set up async init event listener first before netlifyIdentity.init()
+                // Ini membasmi ralat 'undefined' dan masalah butang tersekat semasa halaman pertama kali dimuatkan!
+                netlifyIdentity.on('init', user => {
+                    console.log('Netlify Identity initialized. User session:', user);
+                    handleUserState(user);
+                    if (!user) {
+                        // Secara automatik melancarkan modal log masuk jika tiada sesi aktif dikesan
+                        setTimeout(() => {
+                            netlifyIdentity.open('login');
+                        }, 500);
+                    }
+                });
+
+                // FIXED: Netlify Identity login event listener with forced clean reloads using replace method
+                // Pengendali log masuk Netlify dengan hard-reload replace yang dipanggil dalam jangka masa 500ms
+                netlifyIdentity.on('login', user => {
+                    console.log('Login success:', user);
+                    netlifyIdentity.close();
+                    forceNetlifyCleanup(); // Mencegah pepijat cursor tersekat serta-merta
+
+                    const emailToSave = user.email || (user.user_metadata && user.user_metadata.email) || "User";
+                    localStorage.setItem('currentUserEmail', emailToSave);
+
+                    setTimeout(function() {
+                        window.location.replace(window.location.href);
+                    }, 600);
+                });
+
+                // FIXED: Netlify Identity logout event listener with forced clean reloads to reset dashboard
+                // Pengendali log keluar Netlify dengan penyegaran replace bagi membersihkan status sesi pelawat
+                netlifyIdentity.on('logout', () => {
+                    console.log('Logged out');
+                    forceNetlifyCleanup(); // Membuang tindanan elemen visual modal
+                    localStorage.clear();
+                    sessionStorage.clear();
+                    
+                    setTimeout(function() {
+                        window.location.replace(window.location.href);
+                    }, 400);
+                });
+
+                netlifyIdentity.on('close', () => {
+                    forceNetlifyCleanup(); // Menghalang ralat skrol membeku
+                });
+
+                netlifyIdentity.on('error', err => {
+                    console.error("Netlify Identity Error:", err);
+                    showToast("Authentication error detected.", "error");
+                    forceNetlifyCleanup();
+                });
+
+                // Memulakan pengesahan identiti Netlify secara selamat
+                netlifyIdentity.init();
+            } else {
+                console.warn("Netlify Identity Widget not detected. Progress will sync locally.");
+                // Sync progress with local storage if not hosted on Netlify
+                handleUserState(null);
+            }
+
+            calculateLogic();
+        });
+
+        // Toggle visibility of the Email Configuration panel
+        function toggleEmailSetup() {
+            const toggle = document.getElementById('email-notif-toggle');
+            const setupBox = document.getElementById('email-setup-box');
+            if (toggle.checked) {
+                setupBox.classList.remove('hidden');
+                // Auto-fill logged-in user email if available
+                if (currentUser && currentUser.email) {
+                    document.getElementById('reminder-email').value = currentUser.email;
+                }
+            } else {
+                setupBox.classList.add('hidden');
+            }
+        }
+
+        // Trigger real email alert using EmailJS with graceful sandbox backup on failure
+        // FIXED: Memperbaiki pepijat emel tersekat dengan menetapkan rujukan ID kotak input emel yang betul
+        function sendRealEmailAlert() {
+            const emailInput = document.getElementById("reminder-email").value;
+            
+            // Validasi jika ruangan emel kosong
+            if (!emailInput) {
+                showToast("Please enter your email address first!", "error");
+                return;
+            }
+
+            // Tukar status butang semasa proses menghantar
+            const targetBtn = document.getElementById("test-alert-btn");
+            const originalHtml = targetBtn.innerHTML;
+            targetBtn.innerText = "Sending reminder...";
+            targetBtn.disabled = true;
+
+            // Sediakan parameter mengikut pembolehubah di dashboard EmailJS anda
+            const templateParams = {
+                email_to: emailInput,
+                name: "SafeFund User"
+            };
+
+            // Hantar emel menggunakan Service ID dan Template ID anda
+            emailjs.send('service_0rlsrcs', 'template_zwj6hmh', templateParams)
+                .then(function(response) {
+                   console.log('SUCCESS!', response.status, response.text);
+                   showToast('Success! The English reminder email has been sent to your inbox.', 'success');
+                })
+                .catch(function(error) {
+                   console.error('FAILED...', error);
+                   showToast('Failed to send email. Please check your EmailJS dashboard settings.', 'error');
+                })
+                .finally(function() {
+                   // Set semula rupa butang selepas selesai
+                   targetBtn.innerHTML = originalHtml;
+                   targetBtn.disabled = false;
+                   lucide.createIcons();
+                });
+        }
+
+        // Simulate trigger of custom email notification
+        function simulateEmailNotification(email, message) {
+            document.getElementById('mock-to').innerText = email;
+            document.getElementById('mock-email-modal').classList.remove('hidden');
+        }
+
+        // Tutup modal simulasi emel
+        function closeMockEmailModal() {
+            document.getElementById('mock-email-modal').classList.add('hidden');
+        }
+
+        // FIXED: Enhanced handleUserState logic to securely control visibility of #auth-overlay and #main-dashboard containers
+        // Mengurus paparan skrin penghadang log masuk berdasarkan status keaktifan pengguna Netlify
+        function handleUserState(user) {
+            const authOverlay = document.getElementById('auth-overlay');
+            const mainDashboard = document.getElementById('main-dashboard');
+            
+            const authActionBtn = document.getElementById('auth-action-btn');
+            const logoutActionBtn = document.getElementById('logout-button');
+            const welcomeBanner = document.getElementById('user-welcome-banner');
+            const emailDisplay = document.getElementById('user-email-display');
+            const cloudSaveBtn = document.getElementById('cloud-save-btn');
+
+            if (user) {
+                currentUser = user;
+                
+                // Paparkan dashboard utama dan sembunyikan auth-overlay
+                if (mainDashboard) mainDashboard.classList.remove('hidden');
+                if (authOverlay) authOverlay.classList.add('hidden');
+
+                if (authActionBtn) authActionBtn.classList.add('hidden');
+                if (logoutActionBtn) logoutActionBtn.classList.remove('hidden');
+                if (cloudSaveBtn) cloudSaveBtn.classList.remove('hidden');
+                if (welcomeBanner) welcomeBanner.classList.remove('hidden');
+                if (emailDisplay) emailDisplay.innerText = user.email || "Active User";
+
+                loadPlanFromCloudStorage(user.id);
+            } else {
+                currentUser = null;
+                
+                // Sembunyikan dashboard utama dan paparkan skrin auth-overlay
+                if (mainDashboard) mainDashboard.classList.add('hidden');
+                if (authOverlay) authOverlay.classList.remove('hidden');
+
+                if (authActionBtn) authActionBtn.className = "bg-slate-950 hover:bg-slate-900 text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition-all shadow-sm flex items-center gap-1";
+                if (logoutActionBtn) logoutActionBtn.classList.add('hidden');
+                if (cloudSaveBtn) cloudSaveBtn.classList.add('hidden');
+                if (welcomeBanner) welcomeBanner.classList.add('hidden');
+                
+                // Fallback to load default guest profile data if logged out
+                loadPlanFromCloudStorage('guest');
+            }
+        }
+
+        function openNetlifyModal() {
+            if (window.netlifyIdentity) {
+                netlifyIdentity.open();
+            } else {
+                showToast("Identity is only supported on active Netlify servers. Simulating Guest local storage instead.", "info");
+                // Simulate quick login
+                handleUserState({ id: 'guest', email: 'guest-preview@safefund.com' });
+            }
+        }
+
+        // Jalankan log keluar secara manual dari window global
+        function handleLogout() {
+            if (window.netlifyIdentity) {
+                netlifyIdentity.logout();
+            } else {
+                handleUserState(null);
+            }
+        }
+
+        // Resets the planner form values to avoid mixing session artifacts
+        function resetForm() {
+            document.getElementById('full-name').value = '';
+            document.getElementById('age').value = '';
+            document.getElementById('marital-status').value = 'Single';
+            document.getElementById('employment-status').value = 'Private';
+            document.getElementById('income-stability').value = 'Moderate';
+            document.getElementById('monthly-income').value = '';
+            document.getElementById('custom-monthly-deposit').value = '';
+            document.getElementById('selected-bank').value = 'BankIslam';
+            document.getElementById('custom-rate').value = '3.00';
+            
+            document.getElementById('exp-housing').value = '';
+            document.getElementById('exp-utilities').value = '';
+            document.getElementById('exp-transportation').value = '';
+            document.getElementById('exp-food').value = '';
+            document.getElementById('exp-insurance').value = '';
+            document.getElementById('exp-loan').value = '';
+            document.getElementById('exp-family').value = '';
+            document.getElementById('exp-internet').value = '';
+            document.getElementById('exp-others').value = '';
+            
+            customDepositsMap = {};
+        }
+
+        // Set standard fallback template plan details so dashboard never opens at 0
+        function loadDefaultFormValues() {
+            document.getElementById('full-name').value = "Muhammad Alif Hakim";
+            document.getElementById('age').value = "28";
+            document.getElementById('marital-status').value = "Married";
+            document.getElementById('employment-status').value = "Freelancer";
+            document.getElementById('income-stability').value = "Low";
+            document.getElementById('monthly-income').value = "5000";
+            document.getElementById('custom-monthly-deposit').value = "800";
+            
+            const today = new Date();
+            const year = today.getFullYear();
+            const month = String(today.getMonth() + 1).padStart(2, '0');
+            document.getElementById('start-date').value = `${year}-${month}`;
+
+            document.getElementById('exp-housing').value = "1200";
+            document.getElementById('exp-utilities').value = "200";
+            document.getElementById('exp-transportation').value = "500";
+            document.getElementById('exp-food').value = "700";
+            document.getElementById('exp-insurance').value = "250";
+            document.getElementById('exp-loan').value = "200";
+            document.getElementById('exp-family').value = "200";
+            document.getElementById('exp-internet').value = "80";
+            document.getElementById('exp-others').value = "100";
+            
+            customDepositsMap = {};
+        }
+
+        // Syncs calculations blueprint locally or across Netlify
+        function savePlanToCloud() {
+            const key = currentUser ? `safefund_user_${currentUser.id}` : 'safefund_user_guest';
+
+            try {
+                const payload = {
+                    fullName: document.getElementById('full-name').value,
+                    age: document.getElementById('age').value,
+                    maritalStatus: document.getElementById('marital-status').value,
+                    employmentStatus: document.getElementById('employment-status').value,
+                    incomeStability: document.getElementById('income-stability').value,
+                    monthlyIncome: document.getElementById('monthly-income').value,
+                    customMonthlyDeposit: document.getElementById('custom-monthly-deposit').value,
+                    selectedBank: document.getElementById('selected-bank').value,
+                    customRate: document.getElementById('custom-rate').value,
+                    startDate: document.getElementById('start-date').value,
+                    expenses: {
+                        housing: document.getElementById('exp-housing').value,
+                        utilities: document.getElementById('exp-utilities').value,
+                        transportation: document.getElementById('exp-transportation').value,
+                        food: document.getElementById('exp-food').value,
+                        insurance: document.getElementById('exp-insurance').value,
+                        loan: document.getElementById('exp-loan').value,
+                        family: document.getElementById('exp-family').value,
+                        internet: document.getElementById('exp-internet').value,
+                        others: document.getElementById('exp-others').value,
+                    },
+                    customDepositsMap: customDepositsMap,
+                    savedAt: new Date().toISOString()
+                };
+
+                localStorage.setItem(key, JSON.stringify(payload));
+                showToast("Budget plan saved successfully!", "success");
+            } catch (err) {
+                console.error("Save error:", err);
+                showToast("Failed to save budget plan.", "error");
+            }
+        }
+
+        // FIXED: Enhanced loadPlanFromCloudStorage with safe Null-checks and Fallback values to avoid crash on brand-new signups
+        // Memuatkan data secara selamat serta melindunginya dengan perisai ralat kalis crash
+        function loadPlanFromCloudStorage(userId) {
+            resetForm(); // clear all fields before loading
+            const key = userId === 'guest' ? 'safefund_user_guest' : `safefund_user_${userId}`;
+            try {
+                const storedData = localStorage.getItem(key);
+                if (storedData) {
+                    const data = JSON.parse(storedData);
+
+                    document.getElementById('full-name').value = data.fullName || '';
+                    document.getElementById('age').value = data.age || '';
+                    document.getElementById('marital-status').value = data.maritalStatus || 'Single';
+                    document.getElementById('employment-status').value = data.employmentStatus || 'Private';
+                    document.getElementById('income-stability').value = data.incomeStability || 'Moderate';
+                    document.getElementById('monthly-income').value = data.monthlyIncome || '0';
+                    document.getElementById('custom-monthly-deposit').value = data.customMonthlyDeposit || '0';
+                    document.getElementById('selected-bank').value = data.selectedBank || 'BankIslam';
+                    document.getElementById('custom-rate').value = data.customRate || '3.00';
+                    document.getElementById('start-date').value = data.startDate || '2026-06';
+
+                    if (data.expenses) {
+                        document.getElementById('exp-housing').value = data.expenses.housing || '0';
+                        document.getElementById('exp-utilities').value = data.expenses.utilities || '0';
+                        document.getElementById('exp-transportation').value = data.expenses.transportation || '0';
+                        document.getElementById('exp-food').value = data.expenses.food || '0';
+                        document.getElementById('exp-insurance').value = data.expenses.insurance || '0';
+                        document.getElementById('exp-loan').value = data.expenses.loan || '0';
+                        document.getElementById('exp-family').value = data.expenses.family || '0';
+                        document.getElementById('exp-internet').value = data.expenses.internet || '0';
+                        document.getElementById('exp-others').value = data.expenses.others || '0';
+                    }
+
+                    customDepositsMap = data.customDepositsMap || {};
+                    showToast("Plan details restored!", "success");
+                } else {
+                    // Fallback to load a robust default starter template to prevent calculations from failing with zero values
+                    loadDefaultFormValues();
+                }
+            } catch (err) {
+                console.error("Gagal memuatkan data dari storan:", err);
+                loadDefaultFormValues();
+            }
+            calculateLogic(); // ALWAYS call calculateLogic to compile fresh states safely
+        }
+
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            if (!container) return;
+            const toast = document.createElement('div');
+            
+            let bgClass = "bg-white border-slate-200 text-slate-800";
+            let icon = "info";
+
+            if (type === 'success') {
+                bgClass = "bg-emerald-50 border-emerald-100 text-emerald-800";
+                icon = "check-circle";
+            } else if (type === 'error') {
+                bgClass = "bg-rose-50 border-rose-100 text-rose-800";
+                icon = "alert-triangle";
+            } else if (type === 'loading') {
+                bgClass = "bg-slate-100 border-slate-200 text-slate-700 animate-pulse";
+                icon = "loader";
+            }
+
+            toast.className = `p-4 rounded-2xl border shadow-lg flex items-center gap-3 transition-all duration-300 max-w-sm ${bgClass}`;
+            toast.innerHTML = `
+                <i data-lucide="${icon}" class="w-5 h-5 shrink-0"></i>
+                <span class="text-xs font-bold leading-relaxed">${message}</span>
+            `;
+
+            container.appendChild(toast);
+            lucide.createIcons();
+
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-2');
+                setTimeout(() => toast.remove(), 300);
+            }, 4000);
+        }
+
+        function scrollToId(id) {
+            const element = document.getElementById(id);
+            if (element) {
+                element.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        function loadSampleData() {
+            document.getElementById('full-name').value = "Muhammad Alif Hakim";
+            document.getElementById('age').value = "28";
+            document.getElementById('marital-status').value = "Married with Kids";
+            document.getElementById('employment-status').value = "Freelancer";
+            document.getElementById('income-stability').value = "Low";
+            document.getElementById('monthly-income').value = "5000";
+            document.getElementById('custom-monthly-deposit').value = "800";
+            document.getElementById('start-date').value = "2026-07";
+
+            customDepositsMap = {};
+
+            document.getElementById('exp-housing').value = "1200";
+            document.getElementById('exp-utilities').value = "200";
+            document.getElementById('exp-transportation').value = "500";
+            document.getElementById('exp-food').value = "700";
+            document.getElementById('exp-insurance').value = "250";
+            document.getElementById('exp-loan').value = "200";
+            document.getElementById('exp-family').value = "200";
+            document.getElementById('exp-internet').value = "80";
+            document.getElementById('exp-others').value = "100";
+
+            document.getElementById('selected-bank').value = "TnG";
+            document.getElementById('custom-rate-container').classList.add('hidden');
+
+            calculateLogic();
+            scrollToId('setup-section');
+        }
+
+        function onMonthDepositChange(index, value) {
+            const val = parseFloat(value);
+            if (isNaN(val) || val < 0) {
+                customDepositsMap[index] = 0;
+            } else {
+                customDepositsMap[index] = val;
+            }
+            calculateLogic();
+        }
+
+        // Primary calculation engine
+        function calculateLogic() {
+            const income = parseFloat(document.getElementById('monthly-income').value) || 0;
+            const empStatus = document.getElementById('employment-status').value;
+            const stability = document.getElementById('income-stability').value;
+            const maritalStatus = document.getElementById('marital-status').value;
+            const startDateVal = document.getElementById('start-date').value;
+
+            // Target baseline Monthly Savings reference
+            const userPlannedSaving = parseFloat(document.getElementById('custom-monthly-deposit').value) || 0;
+
+            const housing = parseFloat(document.getElementById('exp-housing').value) || 0;
+            const utilities = parseFloat(document.getElementById('exp-utilities').value) || 0;
+            const transportation = parseFloat(document.getElementById('exp-transportation').value) || 0;
+            const food = parseFloat(document.getElementById('exp-food').value) || 0;
+            const insurance = parseFloat(document.getElementById('exp-insurance').value) || 0;
+            const loan = parseFloat(document.getElementById('exp-loan').value) || 0;
+            const family = parseFloat(document.getElementById('exp-family').value) || 0;
+            const internet = parseFloat(document.getElementById('exp-internet').value) || 0;
+            const others = parseFloat(document.getElementById('exp-others').value) || 0;
+
+            const totalExpenses = housing + utilities + transportation + food + insurance + loan + family + internet + others;
+            
+            // Surplus Capacity calculation
+            const absoluteMaxSavingCapacity = income - totalExpenses;
+            const commitmentRatio = income > 0 ? (totalExpenses / income) * 100 : 0;
+
+            // ==========================================
+            // DYNAMIC RISK ASSESSMENT ENGINE (3 FACTORS)
+            // ==========================================
+            let riskScore = 0;
+
+            // Factor 1: Employment Risk (Max Score: 90)
+            if (empStatus === 'Government') riskScore += 10;
+            else if (empStatus === 'Private') riskScore += 40;
+            else if (empStatus === 'Business Owner') riskScore += 70;
+            else if (empStatus === 'Freelancer') riskScore += 90;
+
+            // Factor 2: Marital & Dependent Burden Risk (Max Score: 40)
+            if (maritalStatus === 'Single') riskScore += 10;
+            else if (maritalStatus === 'Married') riskScore += 25;
+            else if (maritalStatus === 'Married with Kids') riskScore += 40;
+
+            // Factor 3: Expense to Income Pressure (Max Score: 40)
+            if (commitmentRatio <= 50) riskScore += 10;
+            else if (commitmentRatio <= 75) riskScore += 25;
+            else riskScore += 40;
+
+            // Normalize compiled risk rating to a dynamic 10-100% scale
+            let finalRiskMetric = Math.min(100, Math.max(10, Math.round((riskScore / 170) * 100)));
+
+            let riskLabel = "MODERATE";
+            let riskColorClass = "bg-yellow-100 text-yellow-800";
+            let riskBgClass = "from-yellow-50 to-orange-50 border-yellow-200";
+            let recommendedMonths = 6;
+
+            if (finalRiskMetric <= 35) {
+                riskLabel = "LOW";
+                riskColorClass = "bg-emerald-100 text-emerald-800";
+                riskBgClass = "from-emerald-50 to-teal-50 border-emerald-200";
+                recommendedMonths = 3;
+            } else if (finalRiskMetric > 65) {
+                riskLabel = "HIGH";
+                riskColorClass = "bg-red-100 text-red-800";
+                riskBgClass = "from-red-50 to-rose-50 border-red-200";
+                recommendedMonths = 9;
+            }
+
+            const riskBadgeContainer = document.getElementById('risk-badge-container');
+            const riskBadgeText = document.getElementById('risk-badge-text');
+            const riskDisplayLabel = document.getElementById('risk-display-label');
+
+            if (riskBadgeContainer) {
+                riskBadgeContainer.className = `p-4 rounded-xl flex items-center justify-between border bg-gradient-to-r ${riskBgClass}`;
+                riskBadgeText.className = `px-3 py-1.5 rounded-full text-xs font-bold shadow-sm ${riskColorClass}`;
+                riskBadgeText.innerText = riskLabel;
+                riskDisplayLabel.innerText = `${riskLabel} (Score: ${finalRiskMetric}%)`;
+            }
+
+            const targetEmergencyFund = totalExpenses * recommendedMonths;
+
+            // Bank Interest / Yield Rate mapping
+            const selectedBank = document.getElementById('selected-bank').value;
+            let annualRate = 0;
+            if (selectedBank === 'Custom') {
+                annualRate = parseFloat(document.getElementById('custom-rate').value) / 100 || 0;
+            } else {
+                annualRate = bankRates[selectedBank] || 0;
+            }
+            const monthlyRate = annualRate / 12;
+
+            document.getElementById('display-annual-rate').innerText = `${(annualRate * 100).toFixed(2)}%`;
+            document.getElementById('display-monthly-rate').innerText = `${(monthlyRate * 100).toFixed(3)}%`;
+
+            // Calculate estimated duration with default planned saving amount
+            let estimatedMonthsNeeded = 0;
+            if (userPlannedSaving > 0 && targetEmergencyFund > 0) {
+                let simBalance = 0;
+                while (simBalance < targetEmergencyFund && estimatedMonthsNeeded < 360) {
+                    simBalance = simBalance + userPlannedSaving + (simBalance * monthlyRate);
+                    estimatedMonthsNeeded++;
+                }
+            }
+
+            // Timeline period count bounds (Minimum of 6 months, maximum of 120 months)
+            let timelinePeriodCount = Math.max(6, Math.min(120, estimatedMonthsNeeded));
+            if (userPlannedSaving === 0 || targetEmergencyFund === 0) {
+                timelinePeriodCount = 12;
+            }
+
+            document.getElementById('chart-title').innerText = `${timelinePeriodCount}-Month Dynamic Projections Timeline`;
+            document.getElementById('ledger-title').innerText = `Month-to-Month Projections Ledger (${timelinePeriodCount} Months Target Goal)`;
+
+            // Parse Date Picker Values
+            let startYear = 2026;
+            let startMonth = 5; // June (0-indexed)
+            if (startDateVal) {
+                const [y, m] = startDateVal.split('-');
+                startYear = parseInt(y);
+                startMonth = parseInt(m) - 1;
+            }
+
+            // Build dynamic ledger rows
+            const tableBody = document.getElementById('progress-table-body');
+            tableBody.innerHTML = '';
+
+            let currentBalance = 0;
+            let totalDividends = 0;
+            let cumulativeActualDeposits = 0;
+            
+            const monthsLabels = [];
+            const savingsTrendPoints = [];
+
+            for (let month = 1; month <= timelinePeriodCount; month++) {
+                const beginningBalance = currentBalance;
+                
+                // Get chronological Month / Year label
+                const currentDate = new Date(startYear, startMonth + month - 1, 1);
+                const periodLabel = currentDate.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+
+                // =============================================================
+                // DYNAMIC CARRYOVER LOGIC (CARRYOVER SUGGESTION)
+                // =============================================================
+                // Target accumulated sum up to the current month
+                const idealCumulativeExpected = month * userPlannedSaving;
+                // Suggest target to offset previous shortfall debts
+                let suggestedMonthDeposit = idealCumulativeExpected - cumulativeActualDeposits;
+                if (suggestedMonthDeposit < 0) suggestedMonthDeposit = 0;
+
+                // Load manual user deposit or keep 0
+                const currentMonthDeposit = (customDepositsMap[month - 1] !== undefined) ? customDepositsMap[month - 1] : 0;
+                cumulativeActualDeposits += currentMonthDeposit;
+
+                const interestEarned = beginningBalance * monthlyRate;
+                totalDividends += interestEarned;
+                
+                const endingBalance = beginningBalance + currentMonthDeposit + interestEarned;
+                currentBalance = endingBalance;
+
+                const progressPercentage = targetEmergencyFund > 0 ? (endingBalance / targetEmergencyFund) * 100 : 0;
+
+                monthsLabels.push(periodLabel);
+                savingsTrendPoints.push(parseFloat(endingBalance.toFixed(2)));
+
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50/50 transition-colors";
+                tr.innerHTML = `
+                    <td class="py-3 px-4 font-semibold text-slate-700">${periodLabel}</td>
+                    <td class="py-3 px-4 text-right text-slate-500">RM ${beginningBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                    <td class="py-3 px-4 text-center">
+                        <div class="flex flex-col items-center justify-center gap-1">
+                            <div class="inline-flex items-center gap-1">
+                                <span class="text-[10px] font-bold text-slate-400">RM</span>
+                                <input type="number" 
+                                       value="${customDepositsMap[month - 1] !== undefined ? customDepositsMap[month - 1] : ''}" 
+                                       onchange="onMonthDepositChange(${month - 1}, this.value)" 
+                                       placeholder="0"
+                                       class="w-24 text-center px-1.5 py-1 rounded border border-slate-200 text-xs font-bold text-brand-600 focus:ring-1 focus:ring-brand-500 focus:outline-none bg-white hover:bg-slate-50 transition-colors"
+                                       title="Type actual savings deposited for this period">
+                            </div>
+                            <span class="text-[9px] font-semibold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full" title="Adjusted target to cover carryover debt">
+                                Suggestion: <span class="font-extrabold text-brand-700">RM ${Math.round(suggestedMonthDeposit).toLocaleString()}</span>
+                            </span>
+                        </div>
+                    </td>
+                    <td class="py-3 px-4 text-right text-amber-600 font-medium">+RM ${interestEarned.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                    <td class="py-3 px-4 text-right font-bold text-slate-800">RM ${endingBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                    <td class="py-3 px-4 text-center">
+                        <span class="inline-block w-16 text-xs px-2 py-0.5 rounded-full font-bold ${progressPercentage >= 100 ? 'bg-emerald-100 text-emerald-800' : 'bg-brand-50 text-brand-700'}">
+                            ${progressPercentage.toFixed(0)}%
+                        </span>
+                    </td>
+                `;
+                tableBody.appendChild(tr);
+            }
+
+            // UI metric bindings
+            document.getElementById('summary-total-expenses').innerText = `RM ${totalExpenses.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+            document.getElementById('summary-saving-capacity-left').innerText = `RM ${absoluteMaxSavingCapacity.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+            document.getElementById('summary-saving-capacity').innerText = `RM ${userPlannedSaving.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+            
+            document.getElementById('kpi-target').innerText = `RM ${targetEmergencyFund.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+            document.getElementById('kpi-savings').innerText = `RM ${currentBalance.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+            document.getElementById('kpi-dividends').innerText = `RM ${totalDividends.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+            
+            const overallAchievementPercent = targetEmergencyFund > 0 ? Math.min(100, Math.round((currentBalance / targetEmergencyFund) * 100)) : 0;
+            document.getElementById('kpi-percentage').innerText = `${overallAchievementPercent}%`;
+
+            document.getElementById('status-cap').innerText = `RM ${userPlannedSaving.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+            document.getElementById('status-min').innerText = `RM ${(totalExpenses * 3).toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+            document.getElementById('status-target').innerText = `RM ${targetEmergencyFund.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+
+            // FIXED: RESTORED FULL MULTI-FACTOR CARD UI BINDINGS
+            document.getElementById('commitment-ratio-label').innerText = `${commitmentRatio.toFixed(1)}%`;
+            const ratioBar = document.getElementById('commitment-ratio-bar');
+            if (ratioBar) {
+                ratioBar.style.width = `${Math.min(100, commitmentRatio)}%`;
+            }
+            
+            let ratioDesc = "";
+            if (income === 0 && totalExpenses === 0) {
+                ratioDesc = "Enter income and commitment costs to run analysis.";
+            } else if (commitmentRatio <= 50) {
+                if (ratioBar) ratioBar.className = "bg-emerald-500 h-2 rounded-full transition-all duration-500";
+                ratioDesc = "Healthy commitment ratio. Solid financial surplus capacity.";
+            } else if (commitmentRatio <= 75) {
+                if (ratioBar) ratioBar.className = "bg-yellow-500 h-2 rounded-full transition-all duration-500";
+                ratioDesc = "Moderately high commitments. Consider cost optimization.";
+            } else {
+                if (ratioBar) ratioBar.className = "bg-red-500 h-2 rounded-full transition-all duration-500";
+                ratioDesc = "Critical! Commitments occupy over 75% of income. Hard to construct tabung shield.";
+            }
+            document.getElementById('commitment-ratio-desc').innerText = ratioDesc;
+
+            document.getElementById('rec-months').innerText = `${recommendedMonths} Months`;
+            document.getElementById('rec-total-fund').innerText = `RM ${targetEmergencyFund.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+            document.getElementById('rec-months-to-achieve').innerText = userPlannedSaving > 0 ? `${estimatedMonthsNeeded} Months` : 'N/A (Please Set Deposit)';
+
+            updateChart(monthsLabels, savingsTrendPoints, targetEmergencyFund);
+        }
+
+        // Line Chart Rendering
+        function updateChart(labels, dataPoints, targetLineValue) {
+            const ctx = document.getElementById('projectionChart').getContext('2d');
+
+            if (chartInstance) {
+                chartInstance.destroy();
+            }
+
+            const targetLineData = Array(labels.length).fill(targetLineValue);
+
+            chartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Projected Saving Balance (RM)',
+                            data: dataPoints,
+                            borderColor: '#059669',
+                            backgroundColor: 'rgba(5, 150, 105, 0.08)',
+                            borderWidth: 3,
+                            fill: true,
+                            tension: 0.1,
+                            pointBackgroundColor: '#059669',
+                            pointRadius: labels.length > 36 ? 1 : 3,
+                            pointHoverRadius: 7
+                        },
+                        {
+                            label: 'Emergency Goal Target (RM)',
+                            data: targetLineData,
+                            borderColor: '#ef4444',
+                            borderDash: [6, 6],
+                            borderWidth: 2,
+                            fill: false,
+                            pointRadius: 0,
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                font: { family: 'Plus Jakarta Sans', size: 11 }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) label += ': ';
+                                    if (context.parsed.y !== null) {
+                                        label += new Intl.NumberFormat('en-US', { style: 'currency', currency: 'MYR' }).format(context.parsed.y);
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                font: { family: 'Plus Jakarta Sans', size: 10 },
+                                callback: function(value) { return 'RM ' + value.toLocaleString(); }
+                            },
+                            grid: { color: 'rgba(229, 231, 235, 0.5)' }
+                        },
+                        x: {
+                            ticks: {
+                                font: { family: 'Plus Jakarta Sans', size: 10 },
+                                maxTicksLimit: 15
+                            },
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>
